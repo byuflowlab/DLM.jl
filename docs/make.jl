@@ -1,17 +1,17 @@
-using Documenter
-using DLM
+using Documenter, DLM
 
-makedocs(
-    sitename = "DLM",
+makedocs(;
+    modules = [DLM],
+    format = Documenter.HTML(),
     pages = [
         "Home" => "index.md",
         "Example" => "example.md",
         "Library" => "library.md"
     ],
-#    format = Documenter.HTML(),
-    modules = [DLM]
+    sitename = "DLM.jl",
+    authors = "Taylor McDonnell <taylormcd@byu.edu>",
 )
 
-# deploydocs(
-#     repo="github.com/byuflowlab/DLM.jl.git",
-# )
+deploydocs(
+    repo="github.com/byuflowlab/DLM.jl.git",
+)
