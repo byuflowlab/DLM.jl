@@ -118,7 +118,7 @@ nothing #hide
 
 This exact analysis was performed by van Zyl in "Robustness of the subsonic doublet lattice method".  Here's a comparison of our results to van Zyl's results:
 
-```@example example
+```@setup example
 using Plots
 pyplot()
 
@@ -141,7 +141,7 @@ scatter!(kr, imag(CL), label="DLM.jl")
 plot(p1, p2, layout=(1,2), show=true)
 savefig("comparison.svg")
 
-nothing
+nothing #hide
 ```
 
 ![](comparison.svg)
