@@ -7,7 +7,7 @@ Pages = ["example.md"]
 Depth = 3
 ```
 
-```@setup example
+```@example example
 using DLM
 ```
 
@@ -118,7 +118,7 @@ nothing #hide
 
 This exact analysis was performed by van Zyl in "Robustness of the subsonic doublet lattice method".  Here's a comparison of our results to van Zyl's results:
 
-```@eval example
+```@example example
 using Plots
 pyplot()
 
