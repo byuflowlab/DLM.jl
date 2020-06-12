@@ -35,4 +35,4 @@ This package was originally created based on the Python/Fortran DLM implementati
 
 ## Usage
 
-See the [documentation](https://flow.byu.edu/DLM.jl/dev)
+See the [example](@ref Example)
