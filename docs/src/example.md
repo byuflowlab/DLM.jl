@@ -139,8 +139,12 @@ scatter!(kr, imag(CL_van_Zyl), label="van Zyl")
 scatter!(kr, imag(CL), label="DLM.jl")
 
 plot(p1, p2, layout=(1,2), show=true)
-nothing #hide
+savefig("comparison.svg")
+
+nothing
 ```
+
+![](comparison.svg)
 
 As you can see, the results match exactly.  This is actually not surprising,
 since the doublet lattice method implementation in DLM.jl is based on the same theory as the doublet lattice method used by van Zyl.
