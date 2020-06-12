@@ -13,10 +13,10 @@ Author: Taylor McDonnell
 - Capable of modeling multiple arbitrarily defined trapezoidal geometries
 - Highly accurate 12-term exponential approximation of the kernel integrals
 - Multiple options for fits of the linear and nonlinear terms of the kernel function
- - With the parabolic fit:
-  - Capable of accurately handling panel aspect ratios of up to 3
- - With the quartic fit:
-  - Capable of accurately handling panel aspect ratios of up to 6-10
+  - With the parabolic fit:
+   - Capable of accurately handling panel aspect ratios of up to 3
+  - With the quartic fit:
+   - Capable of accurately handling panel aspect ratios of up to 6-10
 - Simple result visualization with [WriteVTK](https://github.com/jipolanco/WriteVTK.jl)
 - Validated against published Doublet Lattice Method results.
 - Allocation-free code
