@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Example · DLM.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DLM.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Example</a><ul class="internal"><li><a class="tocitem" href="#Defining-the-geometry-1"><span>Defining the geometry</span></a></li><li><a class="tocitem" href="#Setting-the-flow-conditions-1"><span>Setting the flow conditions</span></a></li><li><a class="tocitem" href="#Solving-for-the-lift-slope-1"><span>Solving for the lift slope</span></a></li><li><a class="tocitem" href="#Examine-the-Results-1"><span>Examine the Results</span></a></li><li><a class="tocitem" href="#Evaluating-the-Accuracy-of-the-Results-1"><span>Evaluating the Accuracy of the Results</span></a></li></ul></li><li><a class="tocitem" href="../library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Example</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Example</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/byuflowlab/DLM.jl/blob/master/docs/src/example.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Example-1"><a class="docs-heading-anchor" href="#Example-1">Example</a><a class="docs-heading-anchor-permalink" href="#Example-1" title="Permalink"></a></h1><p>This example shows how to use DLM.jl to solve for the lift coefficient slope of a rectangular wing with an aspect ratio of 20 pitching about its midchord.</p><ul><li><a href="#Example-1">Example</a></li><ul><li><a href="#Defining-the-geometry-1">Defining the geometry</a></li><li><a href="#Setting-the-flow-conditions-1">Setting the flow conditions</a></li><li><a href="#Solving-for-the-lift-slope-1">Solving for the lift slope</a></li><li><a href="#Examine-the-Results-1">Examine the Results</a></li><li><a href="#Evaluating-the-Accuracy-of-the-Results-1">Evaluating the Accuracy of the Results</a></li></ul></ul><h2 id="Defining-the-geometry-1"><a class="docs-heading-anchor" href="#Defining-the-geometry-1">Defining the geometry</a><a class="docs-heading-anchor-permalink" href="#Defining-the-geometry-1" title="Permalink"></a></h2><p>Surfaces are defined in DLM.jl by creating rectangular grids with shape <code>(3, ni, nj)</code>.  The first dimension is used for the x, y, and z coordinates, respectively.  The second dimension is used for the grid index in the chordwise direction.  The third dimension is used for the grid index in the spanwise direction.</p><p>Here we will create the AR 20 wing with 10 panels in the chordwise direction and 40 panels in the spanwise direction.</p><pre><code class="language-julia">  AR = 20
+
+  nchord = 10
+  nspan = 40
+
+  b = 10
+  semispan = b/2
+  chord = b/AR
+  symmetric = true
+
+  xyz = zeros(3, nchord+1, nspan+1)
+  for i = 1:nchord+1
+      for j = 1:nspan+1
+          xyz[1, i, j] = chord*(i-1)/nchord
+          xyz[2, i, j] = semispan*(j-1)/nspan
+      end
+  end</code></pre><p>Using this convention, the geometry can be easily visualized using <a href="https://github.com/jipolanco/WriteVTK.jl">WriteVTK</a>.</p><pre><code class="language-julia">using WriteVTK
+
+# add extra dimension for WriteVTK
+xyz_vtk = reshape(xyz, size(xyz)..., 1)
+
+# initialize vtk file
+vtkfile = vtk_grid(&quot;example&quot;, xyz_vtk)
+
+# save the vtk file
+vtk_save(vtkfile)</code></pre><p><img src="../geometry.png" alt/></p><h2 id="Setting-the-flow-conditions-1"><a class="docs-heading-anchor" href="#Setting-the-flow-conditions-1">Setting the flow conditions</a><a class="docs-heading-anchor-permalink" href="#Setting-the-flow-conditions-1" title="Permalink"></a></h2><p>For this example we will use the following flow properties:</p><ul><li>Velocity: 10 m/s</li><li>Mach Number: 0 (Incompressible)</li><li>Reduced Frequency (based on chord): [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]</li></ul><pre><code class="language-julia">U = 10
+M = 0.0
+kr = [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]</code></pre><h2 id="Solving-for-the-lift-slope-1"><a class="docs-heading-anchor" href="#Solving-for-the-lift-slope-1">Solving for the lift slope</a><a class="docs-heading-anchor-permalink" href="#Solving-for-the-lift-slope-1" title="Permalink"></a></h2><p>To solve for the lift slope we perform the following steps:</p><ul><li>Construct the AIC matrix</li><li>Find the downwash on each panel&#39;s control point</li><li>Solve the system to find the pressure coefficients</li><li>Integrate to find the lift coefficient</li></ul><pre><code class="language-julia">AIC = zeros(Complex{Float64}, nchord, nspan, nchord, nspan)
+w = zeros(Complex{Float64}, nchord, nspan)
+CL = zeros(Complex{Float64}, length(kr))
+
+for k = 1:length(kr)
+
+    # compute circular frequency
+    ω = U*kr[k]/(chord)
+
+    # calculate AIC
+    influence_matrix!(AIC, ω, U, M, xyz, true)
+
+    # calculate downwash
+    for i = 1:nchord
+        for j = 1:nspan
+            # get control point x-location
+            x1 = (1/2)*xyz[1,i,j] + (1/2)*xyz[1,i,j+1]
+            x2 = (1/2)*xyz[1,i+1,j] + (1/2)*xyz[1,i+1,j+1]
+            x = (1/4)*x1 + (3/4)*x2
+            # compute downwash
+            # -1/U*(dh/dt + U*dh/dx), where h = (x - 0.5c)*e^{j*omega*t}
+            w[i,j] = -1.0 - 1im*(ω/U)*(x-0.5*chord)
+        end
+    end
+
+    # solve the system to get the pressure coefficients
+    Cp = pressure_coefficients(AIC, w)
+
+    # integrate to find the lift slope
+    CL[k] = sum(Cp)/(nspan*nchord)
+end
+
+println(CL)</code></pre><pre><code class="language-none">Complex{Float64}[5.469951193063653 + 0.0im, 4.290939951467311 + 0.3166473189485307im, 3.811308954684494 + 1.623745292882406im, 3.4297214864062022 + 4.106557503770894im, 3.173824870397947 + 6.327687027471004im, 2.9114292317363 + 8.29013753929997im, 2.6262943633142957 + 9.975798091612491im, 2.323877065478717 + 11.36817650214414im, 2.014750520973105 + 12.461220208818865im, 1.7097578786561909 + 13.260874668344076im, 1.4181499074018102 + 13.78370390825787im, 1.1468807841505873 + 14.05432585659564im]</code></pre><h2 id="Examine-the-Results-1"><a class="docs-heading-anchor" href="#Examine-the-Results-1">Examine the Results</a><a class="docs-heading-anchor-permalink" href="#Examine-the-Results-1" title="Permalink"></a></h2><p>This exact analysis was performed by van Zyl in &quot;Robustness of the subsonic doublet lattice method&quot;.  Here&#39;s a comparison of our results to van Zyl&#39;s results:</p><pre><code class="language-">using Plots
+pyplot()
+
+# 10 x 40 - extracted from plot
+CL_van_Zyl = [5.5+0.0im, 4.3+0.2im, 3.8+1.5im, 3.4+4.0im, 3.2+6.2im, 2.9+8.2im,
+    2.6+9.9im, 2.3+11.3im, 2.0+12.4im, 1.7+13.2im, 1.4+13.8im, 1.1+14.0im]
+
+p1 = plot(grid=false, overwrite_figure=false,
+    xlabel=&quot;k&quot;, xlim=(0,10), xticks=0:2:10,
+    ylabel=&quot;\$Re(C_{L\\alpha})\$&quot;, ylim=(-1,7), yticks=-1:7)
+scatter!(kr, real(CL_van_Zyl), label=&quot;van Zyl&quot;)
+scatter!(kr, real(CL), label=&quot;DLM.jl&quot;)
+
+p2 = plot(grid=false, overwrite_figure=false,
+    xlabel=&quot;k&quot;, xlim=(0,10), xticks=0:2:10,
+    ylabel=&quot;\$Im(C_{L\\alpha})\$&quot;, ylim=(-5,30), yticks=-5:5:30)
+scatter!(kr, imag(CL_van_Zyl), label=&quot;van Zyl&quot;)
+scatter!(kr, imag(CL), label=&quot;DLM.jl&quot;)
+
+plot(p1, p2, layout=(1,2), show=true)
+nothing #hide</code></pre><p>As you can see, the results match exactly.  This is actually not surprising, since the doublet lattice method implementation in DLM.jl is based on the same theory as the doublet lattice method used by van Zyl.</p><h2 id="Evaluating-the-Accuracy-of-the-Results-1"><a class="docs-heading-anchor" href="#Evaluating-the-Accuracy-of-the-Results-1">Evaluating the Accuracy of the Results</a><a class="docs-heading-anchor-permalink" href="#Evaluating-the-Accuracy-of-the-Results-1" title="Permalink"></a></h2><p>Even though our results matched those of van Zyl, that doesn&#39;t mean that they are accurate.  Here we show an excerpt from van Zyl&#39;s paper which shows just how accurate our analysis is:</p><p><img src="../vanZyl.png" alt/></p><p>The extrapolated solution shown in the figure is effectively the grid-converged solution, which is pretty close to the analytical solution for an infinite aspect-ratio wing.  The doublet lattice results for the 10x10 and 10x40 grids, however, fail to be accurate past a reduced frequency of 2 due to the coarseness of the grid in the chordwise direction.</p><p>While doing a grid-independent study is the only sure way of knowing whether your discretization has converged to the correct pressure distribution, previous studies have suggested specified numbers of panels per wavelength in order to resolve the pressure distribution.</p><p>Rodden, Taylor, and McIntosh suggested that 50 panels per wavelength may be sufficient to resolve the pressure distribution, with an absolute minimum number of panels of 4.</p><pre><code class="language-julia"># use standard definition of reduced frequency based on semi-chord
+kr = [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+# minimum number of chordwise panels to resolve pressure distribution
+nchord = max.(4, ceil.(Int, 50 .* kr./pi))
+println(&quot;Number of chordwise panels: &quot;, nchord)
+
+# minimum number of spanwise panels for parabolic kernel (maximum panel aspect ratio of 3)
+nspan_parabolic = ceil.(Int, nchord*(AR/2)*1/3)
+println(&quot;Minimum number of spanwise panels for parabolic kernel: &quot;, nspan_parabolic)
+
+# minimum number of spanwise panels for quartic kernel (maximum panel aspect ratio of 6-10)
+nspan_quartic = ceil.(Int, nchord*(AR/2)*1/10)
+println(&quot;Minimum number of spanwise panels for quartic kernel: &quot;, nspan_quartic)</code></pre><pre><code class="language-none">Number of chordwise panels: [4, 16, 32, 64, 96, 128, 160, 191, 223, 255, 287, 319]
+Minimum number of spanwise panels for parabolic kernel: [14, 54, 107, 214, 320, 427, 534, 637, 744, 850, 957, 1064]
+Minimum number of spanwise panels for quartic kernel: [4, 16, 32, 64, 96, 128, 160, 191, 223, 255, 287, 319]</code></pre><p>Others, however, have suggested as few as 12 panels per wavelength is sufficient.  Ultimately the appropriate number of panels depends on how accurate the solution need to be.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../library/">Library »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 12 June 2020 22:55">Friday 12 June 2020</span>. Using Julia version 1.3.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
