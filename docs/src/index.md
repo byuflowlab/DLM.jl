@@ -31,7 +31,7 @@ pkg> add https://github.com/byuflowlab/DLM.jl
 
 ## Performance
 
-This package was originally created based on the Python/Fortran DLM implementation in [dlm4py](https://github.com/gjkennedy/dlm4py). The DLM implemented in this package is roughly 50\% slower than that Fortran implementation.  However, since this package is implemented in pure Julia, it can be used with automatic differentiation as implemented by the [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl) or [ReverseDiff](https://github.com/JuliaDiff/ReverseDiff.jl) packages, or used with other dynamic language features.
+This package was originally created based on the Python/Fortran DLM implementation in [dlm4py](https://github.com/gjkennedy/dlm4py). The DLM implemented in this package is roughly 50% slower than that Fortran implementation.  However, since this package is implemented in pure Julia, it can be used with automatic differentiation as implemented by the [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl) or [ReverseDiff](https://github.com/JuliaDiff/ReverseDiff.jl) packages, or used with other dynamic language features.
 
 ## Usage
 
