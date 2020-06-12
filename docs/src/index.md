@@ -1,6 +1,6 @@
 # DLM.jl
 
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://flow.byu.edu/DLM.jl)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://flow.byu.edu/DLM.jl/dev)
 ![](https://github.com/byuflowlab/DLM.jl/workflows/Run%20tests/badge.svg)
 
 *Pure Julia implementation of the Doublet Lattice Method*
